@@ -1,0 +1,6 @@
+{
+  "name": "CineTrack",
+  "description": "Gérez et enrichissez vos listes de films, séries et animés grâce à l'IA et TMDB.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
