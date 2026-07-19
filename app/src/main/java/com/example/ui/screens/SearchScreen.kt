@@ -115,17 +115,29 @@ fun SearchScreen(
             }
         )
         
-        androidx.compose.animation.AnimatedVisibility(visible = showSuggestions) {
+        val displaySuggestions = remember(suggestions, mediaType, genre) {
+            suggestions.filter { result ->
+                val typeMatch = result.mediaType.equals(mediaType, ignoreCase = true)
+                val genreMatch = if (genre.isNotBlank()) {
+                    result.genre.contains(genre, ignoreCase = true)
+                } else {
+                    true
+                }
+                typeMatch && genreMatch
+            }
+        }
+
+        androidx.compose.animation.AnimatedVisibility(visible = showSuggestions && displaySuggestions.isNotEmpty()) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E2024)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    suggestions.forEachIndexed { index, result ->
+                    displaySuggestions.forEachIndexed { index, result ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -155,17 +167,17 @@ fun SearchScreen(
                                     text = result.title,
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
                                     text = "${result.mediaType} • ${result.genre.take(20)}...",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color(0xFF9EA3AE)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
                             }
                         }
-                        if (index < suggestions.size - 1) {
-                            Divider(color = Color(0xFF2A2D35))
+                        if (index < displaySuggestions.size - 1) {
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                         }
                     }
                 }
@@ -185,14 +197,13 @@ fun SearchScreen(
         )
         
         Spacer(modifier = Modifier.height(16.dp))
-        
-        // Media Type
+             // Media Type
         Text(
             text = "Type de média :",
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.align(Alignment.Start),
-            color = Color.White
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -211,10 +222,10 @@ fun SearchScreen(
                     onClick = { mediaType = code },
                     label = { Text(label) },
                     colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = Color(0xFFF5C518),
-                        selectedLabelColor = Color.Black,
-                        containerColor = Color(0xFF181A1E),
-                        labelColor = Color.White
+                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant
                     ),
                     modifier = Modifier.weight(1f).testTag("add_type_$code")
                 )
@@ -241,7 +252,7 @@ fun SearchScreen(
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.align(Alignment.Start),
-            color = Color.White
+            color = MaterialTheme.colorScheme.onBackground
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -253,7 +264,7 @@ fun SearchScreen(
                 Icon(
                     imageVector = if (userRating >= ratingValue) Icons.Default.Star else Icons.Outlined.StarBorder,
                     contentDescription = null,
-                    tint = Color(0xFFF5C518),
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .size(36.dp)
                         .clickable { userRating = ratingValue }
@@ -301,15 +312,15 @@ fun SearchScreen(
                 onCheckedChange = { isWatched = it },
                 modifier = Modifier.testTag("add_is_watched_checkbox"),
                 colors = CheckboxDefaults.colors(
-                    checkedColor = Color(0xFFF5C518),
-                    checkmarkColor = Color.Black
+                    checkedColor = MaterialTheme.colorScheme.primary,
+                    checkmarkColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "Déjà vu (film/série visionné)",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
@@ -332,7 +343,7 @@ fun SearchScreen(
                     isWatched = false
                     posterUrl = null
                 },
-                colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFF5C518))
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text("Annuler")
             }
@@ -373,13 +384,13 @@ fun SearchScreen(
                 enabled = title.isNotBlank() && !isAdding,
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2A2D35), // like the screenshot 'Ajouter' button
-                    contentColor = Color(0xFF9EA3AE)
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 modifier = Modifier.testTag("add_save_button")
             ) {
                 if (isAdding) {
-                    CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
                 } else {
                     Text("Ajouter", fontWeight = FontWeight.Bold)
                 }
